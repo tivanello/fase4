@@ -1,9 +1,14 @@
 import os
+from pathlib import Path
+
 import pandas as pd
 from sqlalchemy import create_engine
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Raiz do projeto (pasta fase4)
+BASE_DIR = Path(__file__).resolve().parents[1]
 
 def load_from_postgres() -> pd.DataFrame:
     host = os.getenv("DB_HOST")
@@ -36,7 +41,8 @@ def load_data() -> pd.DataFrame:
         return load_from_postgres()
 
     if source == "processed_csv":
-        return pd.read_csv("data/processed/obesity_processed_postgres.csv")
+        return pd.read_csv(BASE_DIR / "data" / "processed" / "obesity_processed_postgres.csv")
 
     # fallback (raw)
-    return pd.read_csv("data/raw/obesity.csv")
+    return pd.read_csv(BASE_DIR / "data" / "raw" / "obesity.csv")
+
