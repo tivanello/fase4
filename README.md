@@ -151,19 +151,20 @@ FASE4/
 
 ## 10) Como executar (Windows / PowerShell)
 
-### 1) Criar e ativar ambiente virtual
-```powershell
+1) Criar e ativar ambiente virtual **powershell**
+
 cd C:\projetos\fase4
 py -3.11 -m venv venv
 .\venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 
-11) Links da entrega 
-App Streamlit: [https://tc-fase4-obesidade-eduardo-gil-tivanello.streamlit.app/]
+## 11) Links da entrega
 
-Dashboard Power BI (link publicado): [https://app.powerbi.com/view?r=eyJrIjoiMzQ4NjU1MjAtY2YwNi00NGZhLWI3NjEtYjQ1NjYxMzE2ZjNkIiwidCI6IjhhZjNmN2Y1LTUzYTQtNDcxYS1hMWI1LWI2N2E5YzQ4YTI1NCJ9]
+**App Streamlit:** https://tc-fase4-obesidade-eduardo-gil-tivanello.streamlit.app/
 
-Repositório GitHub: [https://github.com/tivanello/fase4]
+**Dashboard Power BI (link publicado):** https://app.powerbi.com/view?r=eyJrIjoiMzQ4NjU1MjAtY2YwNi00NGZhLWI3NjEtYjQ1NjYxMzE2ZjNkIiwidCI6IjhhZjNmN2Y1LTUzYTQtNDcxYS1hMWI1LWI2N2E5YzQ4YTI1NCJ9
 
-Vídeo (4–10 min): [COLE AQUI]
+**Repositório GitHub:** https://github.com/tivanello/fase4
+
+**Vídeo (4–10 min):** [COLE AQUI]
