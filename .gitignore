@@ -1,7 +1,17 @@
+# ambiente
 venv/
+.env
+
+# jupyter
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# python
 __pycache__/
 *.pyc
-.env
-.ipynb_checkpoints/
+*.pyo
+
+# sistema
 .DS_Store
-models/
+Thumbs.db
+

@@ -1,12 +1,6 @@
+streamlit
 pandas
 numpy
 scikit-learn
 joblib
-sqlalchemy
-psycopg2-binary
-python-dotenv
-streamlit
-flask
-gunicorn
-requests
 
