@@ -4,13 +4,13 @@ import pandas as pd
 import numpy as np
 import joblib
 
-# =======================
-# CONFIG
-# =======================
+
+# Configuração
+#======================
+
 st.set_page_config(page_title="App Obesidade", page_icon="🍽️", layout="centered")
 
 MODEL_PATH = r"C:\projetos\fase4\models\modelo_rf.joblib"
-FEATURES_CSV = r"C:\projetos\fase4\data\features\obesidade_features.csv"
 
 st.markdown(
     "<style>div[role='listbox'] ul{background-color: #6e42ad};</style>",
@@ -22,82 +22,63 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.info("Preencha e clique em **Avaliar**. O modelo retorna tendência (0/1) e probabilidade de obesidade.")
+st.markdown("""
+<div style="
+    background-color: rgba(33,150,243,0.15);
+    border-left: 6px solid rgba(33,150,243,1);
+    padding: 12px 16px;
+    border-radius: 6px;
+    text-align: center;
+">
+    Preencha os campos e clique em <b>Avaliar</b>.<br>
+    O modelo retorna a sua <b>Probabilidade</b> e <b>Tendência</b> para obesidade.
+</div>
+""", unsafe_allow_html=True)
 
+
+
+# CARREGAMENTO DO MODELO (artefato)
 # =======================
-# LOAD MODEL (artefato)
-# =======================
-@st.cache_resource
+
 @st.cache_resource
 def carregar_artefato(caminho: str):
     artefato = joblib.load(caminho)
-    model = artefato.get("model", artefato)
+
+    # Segurança: Se não for um dicionário (dict) será interrompido e apresentará erro.
+
+    if not isinstance(artefato, dict):
+        raise TypeError("O arquivo .joblib não é um dicionário (artefato).")
+
+    model = artefato["model"]
     feature_columns = artefato.get("feature_columns")
     threshold = float(artefato.get("threshold", 0.5))
-    return model, feature_columns, threshold
 
-model, feature_columns, threshold = carregar_artefato(MODEL_PATH)
+    return artefato, model, feature_columns, threshold
 
-# ======== MAPAS PARA UI AMIGÁVEL (AJUSTE SE SEUS CÓDIGOS FOREM DIFERENTES) ========
+try:
+    artefato, model, feature_columns, threshold = carregar_artefato(MODEL_PATH)
+except Exception as e:
+    st.error(f"Erro ao carregar o modelo em: {MODEL_PATH}\n\n{e}")
+    st.stop()
+
+
+# MAPAS PARA UI (INTERFACE DO USUÁRIO)
+# ========================================
+
 MAPA_SEXO_UI = {"Feminino": 0, "Masculino": 1}
 MAPA_SIM_NAO_UI = {"Não": 0, "Sim": 1}
 MAPA_FREQUENCIA_0_3_UI = {"Nunca": 0, "Às vezes": 1, "Frequentemente": 2, "Sempre": 3}
 MAPA_TEMPO_TELA_0_2_UI = {"Menos de 1 hora por dia": 0, "de 1 a 3 horas por dia": 1, "mais de 3 horas por dia": 2}
 MAPA_TRANSPORTE_0_4_UI = {"Caminhando": 0, "Bicicleta": 1, "Transporte público": 2, "Automóvel": 3, "Moto": 4}
-MAPA_NIVEL_1_3_UI = {"Baixo (1)": 1, "Médio (2)": 2, "Alto (3)": 3}
-MAPA_REFEICOES_UI = {"1": 1, "2": 2, "3": 3, "4": 4, "5": 5}
+MAPA_NIVEL_1_3_VEGETAIS_UI = {"Pouco (quase não coloco no prato)": 1, "Normal (uma porção no prato)": 2, "Bastante (metade do prato ou mais)": 3}
+MAPA_REFEICOES_UI = {"Apenas uma": 1, "Duas Refeições": 2, "Três Refeições": 3, "Quatro Refeições": 4, "Cinco Refeições": 5}
 MAPA_ATIVIDADE_0_3_UI = {"Nenhuma": 0, "Uma Vez por semana": 1, "duas a três vezes por semana": 2, "Mais de três vezes por semana": 3}
 MAPA_ALCOOL_0_3_UI = {"Não bebo": 0, "Às vezes (1)": 1, "Frequentemente (2)": 2, "Sempre (3)": 3}
+MAPA_NIVEL_AGUA_1_3_UI = {"Apenas 1 litro por dia": 1, "Dois litros por dia": 2, "três litros o mais por dia": 3}
 
 
-# =======================
-# LOAD FEATURES CSV (opcional)
-# =======================
-@st.cache_data
-def carregar_base_features(caminho_csv: str):
-    try:
-        df = pd.read_csv(caminho_csv)
-        return df
-    except Exception:
-        return None
 
-try:
-    model, feature_columns, threshold = carregar_artefato(MODEL_PATH)
-except Exception as e:
-    st.error(f"Erro ao carregar o modelo em: {MODEL_PATH}\n\n{e}")
-    st.stop()
-
-df_ref = carregar_base_features(FEATURES_CSV)
-
-# Colunas esperadas (as suas)
-COLS = [
-    "sexo", "idade", "historico_familiar", "ingere_alim_calorico",
-    "ingere_vegetais", "qtd_refeicao_principal", "come_entre_refeicao",
-    "fumante", "consumo_agua_litro", "monitora_calorias",
-    "freq_atividade_fisica", "tempo_uso_eletronico",
-    "frequencia_consumo_alcool", "meio_de_transporte"
-]
-
-# Se o artefato trouxe feature_columns, usa como fonte de verdade
-if feature_columns is not None:
-    COLS = list(feature_columns)
-
-def _uniques(col, fallback):
-    if df_ref is None or col not in df_ref.columns:
-        return fallback
-    vals = sorted(pd.Series(df_ref[col].dropna().unique()).tolist())
-    return vals if len(vals) > 0 else fallback
-
-def _minmax(col, fallback_min, fallback_max):
-    if df_ref is None or col not in df_ref.columns:
-        return fallback_min, fallback_max
-    s = pd.to_numeric(df_ref[col], errors="coerce").dropna()
-    if s.empty:
-        return fallback_min, fallback_max
-    return float(s.min()), float(s.max())
-
-# =======================
-# FORM
+# FORMULÁRIO (entrada de dados)
 # =======================
 with st.form("form_obesidade"):
     st.write("## Dados básicos")
@@ -126,17 +107,17 @@ with st.form("form_obesidade"):
 
     col5, col6 = st.columns(2)
     with col5:
-        ingere_vegetais_txt = st.selectbox("Ingestão de vegetais", list(MAPA_NIVEL_1_3_UI.keys()), index=1)
+        ingere_vegetais_txt = st.selectbox("Ingestão de vegetais", list(MAPA_NIVEL_1_3_VEGETAIS_UI.keys()), index=1)
         qtd_refeicao_principal_txt = st.selectbox("Refeições principais por dia", list(MAPA_REFEICOES_UI.keys()), index=2)
-        consumo_agua_litro_txt = st.selectbox("Consumo de água", list(MAPA_NIVEL_1_3_UI.keys()), index=1)
+        consumo_agua_litro_txt = st.selectbox("Consumo de água", list(MAPA_NIVEL_AGUA_1_3_UI.keys()), index=1)
 
     with col6:
         freq_atividade_fisica_txt = st.selectbox("Atividade física", list(MAPA_ATIVIDADE_0_3_UI.keys()), index=1)
         tempo_uso_eletronico_txt = st.selectbox("Tempo diário de telas", list(MAPA_TEMPO_TELA_0_2_UI.keys()), index=1)
 
     submit = st.form_submit_button("Avaliar")
-# =======================
-# PREDICT
+
+# CÁLCULO DO RESULTADO / CLASSIFICAÇÃO (resultado do modelo)
 # =======================
 if submit:
     linha = {
@@ -144,11 +125,11 @@ if submit:
         "idade": float(idade),
         "historico_familiar": MAPA_SIM_NAO_UI[historico_familiar_txt],
         "ingere_alim_calorico": MAPA_SIM_NAO_UI[ingere_alim_calorico_txt],
-        "ingere_vegetais": MAPA_NIVEL_1_3_UI[ingere_vegetais_txt],
+        "ingere_vegetais": MAPA_NIVEL_1_3_VEGETAIS_UI[ingere_vegetais_txt],
         "qtd_refeicao_principal": MAPA_REFEICOES_UI[qtd_refeicao_principal_txt],
         "come_entre_refeicao": MAPA_FREQUENCIA_0_3_UI[come_entre_refeicao_txt],
         "fumante": MAPA_SIM_NAO_UI[fumante_txt],
-        "consumo_agua_litro": MAPA_NIVEL_1_3_UI[consumo_agua_litro_txt],
+        "consumo_agua_litro": MAPA_NIVEL_AGUA_1_3_UI[consumo_agua_litro_txt],
         "monitora_calorias": MAPA_SIM_NAO_UI[monitora_calorias_txt],
         "freq_atividade_fisica": MAPA_ATIVIDADE_0_3_UI[freq_atividade_fisica_txt],
         "tempo_uso_eletronico": MAPA_TEMPO_TELA_0_2_UI[tempo_uso_eletronico_txt],
@@ -175,7 +156,14 @@ if submit:
         st.stop()
 
     proba = float(model.predict_proba(X_novo)[:, 1][0])
-    pred = 1 if proba >= threshold else 0
+    pred = 1 if proba >= threshold else 0    
+  
+    if pred == 1:
+        st.error("### Classificação do modelo: **Obeso**")
+        st.write(f"Pelas respostas informadas, o modelo estimou probabilidade ({int(round(proba*100))}%) de obesidade e classificou como **Obeso**.")
+    else:
+        st.success("### Classificação do modelo: **Não obeso**")
+        st.write(f"Pelas respostas informadas, o modelo estimou baixa probabilidade ({int(round(proba*100))}%) de obesidade e classificou como **Não obeso**.")
 
     st.write("---")
     st.write("## Resultado")
@@ -185,10 +173,8 @@ if submit:
 
     st.progress(min(max(proba, 0.0), 1.0))
 
-    if pred == 1:
-        st.error("### Tendência: **Obeso (1)**")
-    else:
-        st.success("### Tendência: **Não obeso (0)**")
+  
 
     with st.expander("Ver linha enviada ao modelo"):
         st.dataframe(X_novo)
+
