@@ -10,7 +10,13 @@ import joblib
 
 st.set_page_config(page_title="App Obesidade", page_icon="🍽️", layout="centered")
 
-MODEL_PATH = r"C:\projetos\fase4\models\modelo_rf.joblib"
+# MODEL_PATH = r"C:\projetos\fase4\models\modelo_rf.joblib" # Executa local
+
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parents[1]   # volta pra raiz do projeto
+MODEL_PATH = BASE_DIR / "models" / "modelo_rf.joblib"
+
 
 st.markdown(
     "<style>div[role='listbox'] ul{background-color: #6e42ad};</style>",
