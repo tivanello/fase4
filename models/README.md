@@ -31,3 +31,4 @@ O `app/app_obesidade.py` carrega o `.joblib`, recupera:
 - `model` para `predict_proba`
 - `threshold` para a decisão final (obeso / não obeso)
 - `feature_columns` para garantir compatibilidade e ordem das features
+
