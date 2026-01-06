@@ -1,202 +1,167 @@
-Tech Challenge – Fase 04 | Data Analytics (Pos Tech)
-1. Descrição do Projeto
+# Tech Challenge – Fase 04 | Data Analytics (Pos Tech)
 
-Este projeto integra o Tech Challenge – Fase 04 da pós-graduação Data Analytics (Pos Tech) e tem como objetivo o desenvolvimento de uma solução completa de Machine Learning aplicada à área da saúde.
+## 1) Descrição do Projeto
+Este projeto é a entrega do **Tech Challenge – Fase 04** da pós-graduação **Data Analytics (Pos Tech)**.
 
-O desafio consiste em construir um modelo preditivo capaz de estimar o nível de obesidade de uma pessoa, com o propósito de auxiliar médicos e médicas no apoio à decisão clínica.
+O objetivo é desenvolver uma solução completa de **Machine Learning aplicada à saúde**, capaz de estimar a **tendência à obesidade** a partir de variáveis de hábitos e contexto, apoiando análise e tomada de decisão.
 
-A obesidade é uma condição multifatorial, influenciada por aspectos genéticos, comportamentais e ambientais. A partir de dados estruturados, este projeto busca identificar padrões relevantes e gerar previsões com desempenho adequado para uso analítico e preditivo.
+Além do modelo, o projeto inclui:
+- **App preditivo em Streamlit**
+- **Dashboard analítico em Power BI**
+- **Pipeline reprodutível** (EDA → Feature Engineering → Treino → Avaliação → Salvamento do modelo)
 
-2. Objetivo do Projeto
+---
 
-Desenvolver uma pipeline completa de Machine Learning, contemplando todas as etapas exigidas no Tech Challenge:
+## 2) Objetivos (requisitos do desafio)
+- Realizar **EDA (análise exploratória)**
+- Preparar dados e realizar **feature engineering**
+- Treinar e avaliar modelos (meta: **acurácia > 75%**)
+- Persistir o modelo treinado (`.joblib`)
+- Publicar um **app em Streamlit** (deploy)
+- Construir um **dashboard** com insights (visão de negócio)
+- Disponibilizar o projeto no GitHub
 
-Análise exploratória e compreensão do problema de negócio
+---
 
-Tratamento e preparação dos dados
+## 3) Base de Dados
+Dataset: **Obesity.csv** (fornecido no desafio).
 
-Feature engineering
+Durante o desenvolvimento, a base passou por:
+- Tratamento inicial em **KNIME**
+- Carga em **PostgreSQL**
+- Consumo no **Power BI** para construção do dashboard
+- Exportação de versões processadas para reprodução local (sem depender do banco)
 
-Treinamento e avaliação de modelos preditivos
+Arquivos no projeto:
+- `data/raw/Obesity.csv` (original)
+- `data/processed/obesity_processed_postgres.csv` (processado para uso geral)
+- `data/processed/obesity_processed_eda.csv` (saída após EDA)
+- `data/features/obesidade_features.csv` (features consolidadas para treino, quando aplicável)
 
-Modelo com acurácia superior a 75%
+---
 
-Deploy do modelo em uma aplicação Streamlit
+## 4) Variáveis Utilizadas (principais)
+- Sexo, Idade
+- Histórico familiar de sobrepeso
+- Consumo de alimentos calóricos
+- Ingestão de vegetais
+- Número de refeições principais
+- Comer entre refeições
+- Tabagismo
+- Consumo de água
+- Monitoramento de calorias
+- Frequência de atividade física
+- Tempo de telas
+- Consumo de álcool
+- Meio de transporte
 
-Construção de um painel analítico com insights relevantes sobre obesidade
+### Variável alvo
+- `Obesity_level` (nível/classificação)
 
-Disponibilização do código-fonte no GitHub
+---
 
-3. Base de Dados
+## 5) Decisão importante (evitar “IMC disfarçado”)
+Para evitar que o modelo virasse apenas um cálculo determinístico de **IMC** (peso/altura²) e gerasse uma acurácia artificialmente alta por **vazamento de informação (data leakage)**, as features **peso** e **altura** foram **excluídas do treinamento**.
 
-O projeto utiliza o dataset obesity.csv, fornecido no enunciado do desafio.
+O foco do modelo é aprender padrões a partir de **hábitos e contexto**, e não reproduzir uma fórmula.
 
-Durante o desenvolvimento, os dados também foram tratados no KNIME e disponibilizados no PostgreSQL, permitindo:
+---
 
-padronização do processo de preparação
+## 6) Pipeline de Machine Learning (notebooks)
+O pipeline foi desenvolvido e documentado em dois notebooks:
 
-integração com Power BI para o painel analítico
+- `notebooks/01_eda.ipynb`
+  - análise de qualidade e exploração
+  - remoção de duplicados
+  - geração da base pós-EDA (`data/processed/obesity_processed_eda.csv`)
 
-exportação de uma base “processada” para reprodução local sem dependência de banco
+- `notebooks/02_feature_engineering.ipynb`
+  - engenharia de features e recodificações
+  - definição do target binário (`target_obeso`: obeso=1 / não obeso=0)
+  - split treino/teste com estratificação
+  - treino e comparação de modelos
+  - avaliação (accuracy, matriz de confusão, ROC/AUC)
+  - salvamento do artefato final `.joblib` (com `model`, `feature_columns`, `threshold`)
 
-4. Variáveis Utilizadas
+Modelo final utilizado no app:
+- `models/modelo_rf.joblib` (**RandomForestClassifier**)
 
-Gender: Gênero
+> Detalhes completos estão em: `notebooks/README.md`
 
-Age: Idade
+---
 
-Height: Altura (m)
+## 7) Aplicação (Streamlit)
+O modelo treinado é consumido por um app Streamlit:
 
-Weight: Peso (kg)
+- `app/app_obesidade.py`
 
-family_history: Histórico familiar de excesso de peso
+O app:
+1. coleta as respostas do usuário (formulário)
+2. converte para valores numéricos (mapas)
+3. monta uma linha (`X_novo`) com a ordem correta (`feature_columns`)
+4. calcula probabilidade (`predict_proba`)
+5. classifica com base em `threshold`
 
-FAVC: Consumo frequente de alimentos calóricos
+> Detalhes completos estão em: `app/README.md`
 
-FCVC: Frequência de consumo de vegetais
+---
 
-NCP: Número de refeições principais diárias
+## 8) Dashboard (Power BI)
+O dashboard está em:
 
-CAEC: Consumo de alimentos entre as refeições
+- `dashboard/Obesidade.pbix`
 
-SMOKE: Hábito de fumar
+Ele apresenta insights como:
+- distribuição de classes / perfis
+- relação entre hábitos e obesidade
+- indicadores úteis para análise e prevenção
 
-CH2O: Consumo diário de água
+> Detalhes completos estão em: `dashboard/README.md`
 
-SCC: Monitoramento da ingestão calórica
+---
 
-FAF: Frequência de atividade física
-
-TUE: Tempo de uso de dispositivos eletrônicos
-
-CALC: Consumo de bebida alcoólica
-
-MTRANS: Meio de transporte utilizado
-
-5. **Variável Alvo**
-
-Obesity_level: Classificação do nível de obesidade
-
-6. Pipeline de Machine Learning
-
-A solução foi estruturada seguindo boas práticas de Data Analytics, Deploy de Aplicações e Machine Learning em Produção, contemplando:
-
-Análise exploratória dos dados (EDA)
-
-Tratamento de variáveis categóricas e numéricas
-
-Feature engineering
-
-Treinamento e validação de modelos
-
-Avaliação de desempenho (acurácia > 75%)
-
-Persistência do modelo treinado
-
-Preparação do modelo para uso em produção
-
-7. Deploy da Aplicação
-
-O modelo treinado é disponibilizado por meio de uma aplicação preditiva desenvolvida em Streamlit, permitindo que profissionais de saúde insiram dados e obtenham previsões de forma simples e direta.
-
-Adicionalmente, foi construído um painel analítico com os principais insights obtidos a partir dos dados, apresentado em uma visão orientada ao negócio, com foco no apoio à equipe médica.
-
-8. Painel Analítico
-
-O painel apresenta, entre outros pontos:
-
-Distribuição dos níveis de obesidade
-
-Relação entre hábitos de vida e obesidade
-
-Perfis de maior risco
-
-Indicadores relevantes para prevenção e acompanhamento clínico
-
-9. Estrutura do Repositório
-fase4/
-│
-├── data/
-│   ├── raw/               # Dados brutos (dataset original)
-│   └── processed/         # Dados tratados (pronto para treino/reprodução)
-│
-├── notebooks/
-│   ├── 01_eda.ipynb
-│   └── 02_feature_engineering.ipynb
-│
-├── src/
-│   ├── data.py
-│   ├── export_processed.py
-│   ├── preprocessing.py
-│   ├── features.py
-│   ├── train.py
-│   └── evaluate.py
-│
+## 9) Estrutura do Repositório
+FASE4/
 ├── app/
-│   └── streamlit_app.py
-│
-├── dashboard/             # Painel analítico (Power BI)
-│
-├── README.md
-└── requirements.txt
+│ ├── app_obesidade.py
+│ └── README.md
+├── dashboard/
+│ ├── Obesidade.pbix
+│ └── README.md
+├── data/
+│ ├── raw/
+│ ├── processed/
+│ ├── features/
+│ └── README.md
+├── models/
+│ ├── modelo_rf.joblib
+│ └── README.md
+├── notebooks/
+│ ├── 01_eda.ipynb
+│ ├── 02_feature_engineering.ipynb
+│ └── README.md
+├── .gitignore
+├── requirements.txt
+└── README.md
 
-## **Como executar o projeto (Windows/PowerShell)**
-1) Criar e ativar ambiente virtual
+
+---
+
+## 10) Como executar (Windows / PowerShell)
+
+### 1) Criar e ativar ambiente virtual
+```powershell
 cd C:\projetos\fase4
 py -3.11 -m venv venv
 .\venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 
-2) Configurar o .env
+11) Links da entrega 
+App Streamlit: [https://tc-fase4-obesidade-eduardo-gil-tivanello.streamlit.app/]
 
-Crie um arquivo .env na raiz do projeto.
+Dashboard Power BI (link publicado): [https://app.powerbi.com/view?r=eyJrIjoiMzQ4NjU1MjAtY2YwNi00NGZhLWI3NjEtYjQ1NjYxMzE2ZjNkIiwidCI6IjhhZjNmN2Y1LTUzYTQtNDcxYS1hMWI1LWI2N2E5YzQ4YTI1NCJ9]
 
-Opção A — Rodar via CSV processado (recomendado para reprodução fácil)
-DATA_SOURCE=processed_csv
+Repositório GitHub: [https://github.com/tivanello/fase4]
 
-
-O arquivo esperado é:
-
-data/processed/obesity_processed_postgres.csv
-
-Opção B — Rodar via PostgreSQL
-DATA_SOURCE=postgres
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=tech_challenge_fase4
-DB_USER=SEU_USUARIO
-DB_PASS=SUA_SENHA
-DB_SCHEMA=public
-DB_TABLE=obesidade
-
-3) (Opcional) Exportar do PostgreSQL para data/processed/
-
-Gera o arquivo:
-
-data/processed/obesity_processed_postgres.csv
-
-python -m src.export_processed
-
-4) Treinar o modelo
-python -m src.train
-
-
-Artefatos gerados:
-
-models/model.joblib
-
-models/meta.json
-
-5) Avaliar o modelo
-python -m src.evaluate
-
-6) Executar o Streamlit (Deploy)
-streamlit run app/streamlit_app.py
-
-**Observações importantes**
-
-O arquivo requirements.txt deve conter somente dependências Python.
-Configurações como DATA_SOURCE=... devem ficar no .env.
-
-Recomenda-se incluir um .env.example no repositório e adicionar .env ao .gitignore para evitar exposição de senha.
+Vídeo (4–10 min): [COLE AQUI]
