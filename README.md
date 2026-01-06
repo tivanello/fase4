@@ -146,7 +146,7 @@ FASE4/
 ├── .gitignore
 ├── requirements.txt
 └── README.md
-
+```
 ---
 
 ## 10) Como executar (Windows / PowerShell)
