@@ -121,29 +121,31 @@ Ele apresenta insights como:
 ---
 
 ## 9) Estrutura do Repositório
+
+
+```text
 FASE4/
 ├── app/
-│ ├── app_obesidade.py
-│ └── README.md
+│   ├── app_obesidade.py
+│   └── README.md
 ├── dashboard/
-│ ├── Obesidade.pbix
-│ └── README.md
+│   ├── Obesidade.pbix
+│   └── README.md
 ├── data/
-│ ├── raw/
-│ ├── processed/
-│ ├── features/
-│ └── README.md
+│   ├── raw/
+│   ├── processed/
+│   ├── features/
+│   └── README.md
 ├── models/
-│ ├── modelo_rf.joblib
-│ └── README.md
+│   ├── modelo_rf.joblib
+│   └── README.md
 ├── notebooks/
-│ ├── 01_eda.ipynb
-│ ├── 02_feature_engineering.ipynb
-│ └── README.md
+│   ├── 01_eda.ipynb
+│   ├── 02_feature_engineering.ipynb
+│   └── README.md
 ├── .gitignore
 ├── requirements.txt
 └── README.md
-
 
 ---
 
