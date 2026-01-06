@@ -154,9 +154,13 @@ FASE4/
 1) Criar e ativar ambiente virtual **powershell**
 
 cd C:\projetos\fase4
+
 py -3.11 -m venv venv
+
 .\venv\Scripts\Activate.ps1
+
 python -m pip install --upgrade pip
+
 pip install -r requirements.txt
 
 ## 11) Links da entrega
@@ -167,4 +171,4 @@ pip install -r requirements.txt
 
 **Repositório GitHub:** https://github.com/tivanello/fase4
 
-**Vídeo (4–10 min):** [COLE AQUI]
+**Vídeo (4–10 min):** https://youtu.be/Z_yKTjskl4w 
